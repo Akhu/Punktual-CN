@@ -11,9 +11,11 @@
 7. Put marker on Map for the papeterie and current user
 8. Communicate with server to log arrival date time + user
 9. Handle external notification from FCM
-10. Improvments : Refactoring the app using live data, navigation graph, etc.
-11. Improvments : Google Login with profile picture
-12. Improvments : Some statistics with Android Chart
-13. Improvments : Detecting the type of transport user for a user + send to server
+10. Improvments : Use Retrofit instead of plain OkHttp
+11. Improvments : Refactoring the app using live data, navigation graph, etc.
+12. Improvments : Google Login with profile picture
+13. Improvments : RecyclerView to display all user of campus with their picture from Server
+14. Improvments : Some statistics with Android Chart
+15. Improvments : Detecting the type of transport user for a user + send to server
 
 Link with a server that is able to send notification to other registered devices/
