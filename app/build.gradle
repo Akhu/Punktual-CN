@@ -44,6 +44,10 @@ dependencies {
     //Timber for better logging
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
+    //Map and location from Google Play Services
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
+
     implementation 'com.google.android.material:material:1.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'

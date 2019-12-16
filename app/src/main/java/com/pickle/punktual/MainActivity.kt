@@ -37,14 +37,16 @@ class MainActivity : AppCompatActivity() {
             })
 
         //Post for login
+        //1. Handle login
         startButton.setOnClickListener {
             PunktualApplication.repo.connectUser(User(username = loginEditText.text.toString()))
             //save response back to shared preference
             val intent = Intent(this, MapActivity::class.java)
             startActivity(intent)
         }
-        //1. Handle login
+
         //2. Ask for location permissions
+
         //3. Handle location settings
         //4. Create geofence
         //5. Start to listen for location changes
