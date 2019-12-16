@@ -1,5 +1,9 @@
 package com.pickle.punktual.user
 
+import android.location.Location
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.google.android.gms.maps.model.LatLng
 import com.pickle.punktual.position.Position
 import com.pickle.punktual.position.PositionHistory
 import org.joda.time.DateTime
@@ -12,17 +16,11 @@ enum class UserType {
 
 data class User(val id: UUID = UUID.randomUUID(), val type: UserType = UserType.STUDENT, val username: String, val pushToken: String? = null, val imageUrl: String? = null) {
     //Joda time used : https://www.joda.org/joda-time/quickstart.html
-    //Each user will get a position list, but we remember only a few of it's declared positions
-    private var positionList: ArrayList<PositionHistory> = ArrayList()
 
-    val positionHistory : List<PositionHistory>
-        get() = positionList
+    var lastPosition : Position? = null
 
-    fun addPosition(position: Position){
-        if(positionList.size >= 5){
-            positionList = positionList.dropLast(1) as ArrayList<PositionHistory>
-        }
-        positionList.add(PositionHistory(DateTime.now(), position))
+    fun setCurrentPositionFromLocation(location: Location){
+        lastPosition = Position(location.latitude, location.longitude)
     }
 }
 

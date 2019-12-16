@@ -13,6 +13,13 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMapOptions
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.pickle.punktual.map.addUserMarker
 import com.pickle.punktual.position.LocationData
 import com.pickle.punktual.user.User
 import kotlinx.android.synthetic.main.activity_map.*
@@ -25,6 +32,10 @@ private const val MAP_DEFAULT_ZOOM = 8f
 
 class MapActivity : AppCompatActivity() {
 
+    private lateinit var map: GoogleMap
+
+    private var userMarker: Marker? = null
+
     private val locationRequest: LocationRequest = LocationRequest.create().apply {
         interval = 10000
         fastestInterval = 5000
@@ -32,20 +43,40 @@ class MapActivity : AppCompatActivity() {
     }
     private lateinit var fusedLocationClient : FusedLocationProviderClient
 
+    private val mapOptions by lazy {
+        with(GoogleMapOptions()) {
+            mapType(GoogleMap.MAP_TYPE_NORMAL)
+            zoomControlsEnabled(true)
+            zoomGesturesEnabled(true)
+            compassEnabled(true)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
         PunktualApplication.repo.getCurrentUser().observe(this, Observer { updateUi(it) })
 
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        val mapFragment = SupportMapFragment.newInstance(mapOptions)
+        mapFragment.getMapAsync { map = it }
+
+        supportFragmentManager
+            .beginTransaction().replace(R.id.mapFrame, mapFragment)
+            .commit()
 
         requestLastLocation()
         requestLocation()
-        //Get Location (Big Part)
-        //Map fragment
+
+        buttonLastPositions.setOnClickListener {
+
+        }
+        //Get Location (Big Part) - DONE
+        //Map fragment -
         //Display POIs
+        //GeoFence
     }
 
     /**
@@ -81,13 +112,31 @@ class MapActivity : AppCompatActivity() {
             Timber.e("Failed to modify location settings")
             handleLocationData(LocationData(exception = it))
         }
-
     }
 
+    /**
+     *
+     */
     private fun handleLocationData(locationData: LocationData){
         locationData.exception?.let {
             handleLocationException(it)
             return
+        }
+
+        locationData.location?.let { location ->
+            val latLng = LatLng(location.latitude, location.longitude)
+
+            userMarker?.let {
+                it.position = latLng
+            } ?: run {
+                if(::map.isInitialized){
+                    map.moveCamera(CameraUpdateFactory
+                        .newLatLngZoom(latLng, MAP_DEFAULT_ZOOM)
+                    )
+
+                    PunktualApplication.repo.setCurrentUserLocation(location)
+                }
+            }
         }
     }
 
@@ -159,6 +208,9 @@ class MapActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun updateUi(user: User) {
         pseudoTextView.text = "${user.username} is connected with id: ${user.id}"
+        user.lastPosition?.let {
+            map.addUserMarker(user, it)
+        }
     }
 
     private fun checkLocationPermission(requestCode: Int) : Boolean {

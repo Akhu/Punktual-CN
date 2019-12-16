@@ -15,6 +15,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCHCNJ3Y9FGPKsMW97ckhMplLvfW8B0D5A"/>
+
         <activity
             android:name=".MapActivity"
             android:label="@string/title_activity_map"
@@ -23,6 +28,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pickle.punktual.MainActivity" />
         </activity>
+
 
         <service
             android:name=".NotificationFCM"
