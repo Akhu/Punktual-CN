@@ -5,13 +5,15 @@ import com.google.firebase.messaging.RemoteMessage
 import timber.log.Timber
 
 class NotificationFCM : FirebaseMessagingService() {
-    override fun onMessageReceived(remoteMessage: RemoteMessage?) {
+
+
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
 
             // ...
 
             // TODO(developer): Handle FCM messages here, Build notification :)
             // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
-            Timber.d("On message receveid From: %s", remoteMessage?.from)
+            Timber.d("On message received From: %s", remoteMessage.from)
 
         // Check if message contains a data payload
             // Check if message contains a notification payload.
@@ -24,7 +26,7 @@ class NotificationFCM : FirebaseMessagingService() {
             // message, here is where that should be initiated. See sendNotification method below.
     }
 
-    override fun onNewToken(token: String?) {
+    override fun onNewToken(token: String) {
         Timber.i("New Token received from FCM $token")
     }
 }

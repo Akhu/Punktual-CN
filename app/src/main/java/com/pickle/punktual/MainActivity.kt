@@ -1,13 +1,19 @@
 package com.pickle.punktual
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
+import com.pickle.punktual.user.User
+import kotlinx.android.synthetic.main.activity_main.*
+import okhttp3.OkHttpClient
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
+
+    private val client = OkHttpClient()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,6 +21,7 @@ class MainActivity : AppCompatActivity() {
 
         FirebaseInstanceId.getInstance().instanceId
             .addOnCompleteListener(OnCompleteListener { task ->
+                //Save token to server when it's successful
                 if (!task.isSuccessful) {
                     Timber.w( task.exception, "getInstanceId failed")
                     return@OnCompleteListener
@@ -29,6 +36,13 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
             })
 
+        //Post for login
+        startButton.setOnClickListener {
+            PunktualApplication.repo.connectUser(User(username = loginEditText.text.toString()))
+            //save response back to shared preference
+            val intent = Intent(this, MapActivity::class.java)
+            startActivity(intent)
+        }
         //1. Handle login
         //2. Ask for location permissions
         //3. Handle location settings
