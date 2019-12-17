@@ -1,4 +1,4 @@
-package com.pickle.punktual
+package com.pickle.punktual.notifications
 
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage

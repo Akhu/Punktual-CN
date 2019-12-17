@@ -1,4 +1,4 @@
-package com.pickle.punktual
+package com.pickle.punktual.geofence
 
 /**
  * Pour implémenter le geofencing il nous faut 2 élément

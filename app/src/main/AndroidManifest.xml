@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <receiver
-            android:name=".GeofenceBroadcastReceiver"
+            android:name=".geofence.GeofenceBroadcastReceiver"
             android:enabled="true"
             android:exported="true"></receiver>
 
@@ -25,7 +25,7 @@
             android:value="AIzaSyCHCNJ3Y9FGPKsMW97ckhMplLvfW8B0D5A" />
 
         <activity
-            android:name=".MapActivity"
+            android:name=".map.MapActivity"
             android:label="@string/title_activity_map"
             android:parentActivityName=".MainActivity">
             <meta-data
@@ -34,7 +34,7 @@
         </activity>
 
         <service
-            android:name=".NotificationFCM"
+            android:name=".notifications.NotificationFCM"
             android:enabled="true"
             android:exported="false">
             <intent-filter>

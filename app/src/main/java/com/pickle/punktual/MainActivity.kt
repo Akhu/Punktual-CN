@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
+import com.pickle.punktual.map.MapActivity
 import com.pickle.punktual.user.User
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.OkHttpClient

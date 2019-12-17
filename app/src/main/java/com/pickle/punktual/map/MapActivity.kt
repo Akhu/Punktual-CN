@@ -1,4 +1,4 @@
-package com.pickle.punktual
+package com.pickle.punktual.map
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -21,7 +21,9 @@ import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.pickle.punktual.map.addUserMarkerWithPosition
+import com.pickle.punktual.PunktualApplication
+import com.pickle.punktual.R
+import com.pickle.punktual.geofence.GeofenceBroadcastReceiver
 import com.pickle.punktual.position.LocationData
 import com.pickle.punktual.position.Position
 import com.pickle.punktual.user.User
@@ -113,7 +115,10 @@ class MapActivity : AppCompatActivity() {
         //We monitor only around papeterie, and only when device is Entering the zone
         val papetGeofence = with(Geofence.Builder()) {
             setRequestId(PunktualApplication.GEOFENCE_PAPETERIE_ID)
-            setCircularRegion(papeteriePosition.latitude, papeteriePosition.longitude, GEOFENCE_RADIUS)
+            setCircularRegion(
+                papeteriePosition.latitude, papeteriePosition.longitude,
+                GEOFENCE_RADIUS
+            )
             setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
             setExpirationDuration(Geofence.NEVER_EXPIRE)
             build()
@@ -188,7 +193,9 @@ class MapActivity : AppCompatActivity() {
                     if(firstLoading) {
                         map.moveCamera(
                             CameraUpdateFactory
-                                .newLatLngZoom(latLng, MAP_DEFAULT_ZOOM)
+                                .newLatLngZoom(latLng,
+                                    MAP_DEFAULT_ZOOM
+                                )
                         )
                         firstLoading = false
                     }
@@ -209,7 +216,9 @@ class MapActivity : AppCompatActivity() {
 
         when (exception) {
             is SecurityException -> checkLocationPermission(REQUEST_PERMISSION_LOCATION_START_UPDATE)
-            is ResolvableApiException -> exception.startResolutionForResult(this, REQUEST_CHECK_FOR_SETTINGS)
+            is ResolvableApiException -> exception.startResolutionForResult(this,
+                REQUEST_CHECK_FOR_SETTINGS
+            )
         }
 
         return true
