@@ -26,7 +26,7 @@ import com.pickle.punktual.R
 import com.pickle.punktual.geofence.GeofenceBroadcastReceiver
 import com.pickle.punktual.position.LocationData
 import com.pickle.punktual.position.Position
-import com.pickle.punktual.user.User
+import com.pickle.punktual.viewModels.ViewModelFactoryRepository
 import kotlinx.android.synthetic.main.activity_map.*
 import timber.log.Timber
 
@@ -39,7 +39,6 @@ private const val MAP_DEFAULT_ZOOM = 8f
 
 private const val GEOFENCE_RADIUS = 100F
 
-private val papeteriePosition = Position(45.907888, 6.102780)
 
 class MapActivity : AppCompatActivity() {
 
@@ -79,7 +78,7 @@ class MapActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
-        viewModel.getCurrentUser().observe(this, Observer {
+        viewModel.getUiState().observe(this, Observer {
             updateUi(it)
         })
 
@@ -99,24 +98,18 @@ class MapActivity : AppCompatActivity() {
 
         requestLastLocation()
         requestLocation()
-
-        setupGeoFence()
-
-        buttonLastPositions.setOnClickListener {
-
-        }
         //Get Location (Big Part) - DONE
         //Map fragment -
         //Display POIs
         //GeoFence
     }
 
-    private fun setupGeoFence() {
+    private fun setupGeoFence(poiFence: Position) {
         //We monitor only around papeterie, and only when device is Entering the zone
         val papetGeofence = with(Geofence.Builder()) {
             setRequestId(PunktualApplication.GEOFENCE_PAPETERIE_ID)
             setCircularRegion(
-                papeteriePosition.latitude, papeteriePosition.longitude,
+                poiFence.latitude, poiFence.longitude,
                 GEOFENCE_RADIUS
             )
             setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
@@ -201,7 +194,7 @@ class MapActivity : AppCompatActivity() {
                     }
 
                     Timber.d("Update current user with gathered location $location")
-                    viewModel.loadUserWithPosition(location)
+                    viewModel.loadMapData(location)
                 }
             }
         }
@@ -275,11 +268,23 @@ class MapActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateUi(user: User) {
-        pseudoTextView.text = "${user.username} is connected with id: ${user.id}"
-        Timber.d("Update current user with gathered location ${user.lastPosition}")
-        user.lastPosition?.let { positionObject ->
-            userMarker = map.addUserMarkerWithPosition(user, positionObject)
+    private fun updateUi(state: MapUiState) {
+        when(state) {
+            is MapUiState.Loading -> {
+
+            }
+            is MapUiState.Ready -> {
+                pseudoTextView.text = "${state.user.username} is connected with id: ${state.user.id}"
+                state.user.lastPosition?.let { positionObject ->
+                    userMarker = map.addUserMarkerWithPosition(state.user, positionObject)
+                    Timber.d("Update current user with gathered location ${state.user.lastPosition}")
+                }
+
+                setupGeoFence(state.papeteriePointOfInterest)
+            }
+            is MapUiState.Error -> {
+                pseudoTextView.text = state.errorMessage
+            }
         }
     }
 
