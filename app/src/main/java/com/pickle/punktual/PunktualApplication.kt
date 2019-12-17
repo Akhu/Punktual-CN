@@ -7,6 +7,7 @@ import timber.log.Timber
 class PunktualApplication : Application(){
 
     companion object {
+        const val GEOFENCE_PAPETERIE_ID = "papeterie"
         val repo = UserRepository()
     }
 

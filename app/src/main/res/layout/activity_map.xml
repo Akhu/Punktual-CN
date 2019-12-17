@@ -15,9 +15,8 @@
         android:text="Last Positions"
         app:layout_constraintBottom_toBottomOf="@+id/pseudoTextView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/pseudoTextView"
-        app:layout_constraintTop_toTopOf="@+id/pseudoTextView" />
+        app:layout_constraintTop_toTopOf="@+id/pseudoTextView"
+        app:layout_constraintVertical_bias="0.551" />
 
     <FrameLayout
         android:id="@+id/mapFrame"
@@ -47,9 +46,10 @@
         android:id="@+id/pseudoTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toStartOf="@+id/buttonLastPositions"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="User Pseudo " />

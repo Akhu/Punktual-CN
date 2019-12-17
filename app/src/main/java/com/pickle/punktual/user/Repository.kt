@@ -3,7 +3,7 @@ package com.pickle.punktual.user
 import android.location.Location
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import com.pickle.punktual.position.Position
 
 class UserRepository {
 
@@ -18,8 +18,9 @@ class UserRepository {
     }
 
     fun setCurrentUserLocation(location: Location) {
-        Transformations.map(currentUser) {
-            it.setCurrentPositionFromLocation(location)
+        currentUser.value?.let { currentUserValue ->
+            currentUserValue.lastPosition = Position(location.latitude, location.longitude)
+            currentUser.value = currentUserValue
         }
     }
 }

@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.pickle.punktual">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
         android:name=".PunktualApplication"
@@ -15,10 +15,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <receiver
+            android:name=".GeofenceBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"></receiver>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCHCNJ3Y9FGPKsMW97ckhMplLvfW8B0D5A"/>
+            android:value="AIzaSyCHCNJ3Y9FGPKsMW97ckhMplLvfW8B0D5A" />
 
         <activity
             android:name=".MapActivity"
@@ -28,7 +32,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pickle.punktual.MainActivity" />
         </activity>
-
 
         <service
             android:name=".NotificationFCM"

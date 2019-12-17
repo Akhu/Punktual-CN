@@ -2,11 +2,13 @@ package com.pickle.punktual
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -19,8 +21,9 @@ import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.pickle.punktual.map.addUserMarker
+import com.pickle.punktual.map.addUserMarkerWithPosition
 import com.pickle.punktual.position.LocationData
+import com.pickle.punktual.position.Position
 import com.pickle.punktual.user.User
 import kotlinx.android.synthetic.main.activity_map.*
 import timber.log.Timber
@@ -30,9 +33,27 @@ private const val REQUEST_CHECK_FOR_SETTINGS = 200
 
 private const val MAP_DEFAULT_ZOOM = 8f
 
+
+
+private const val GEOFENCE_RADIUS = 100F
+
+private val papeteriePosition = Position(45.907888, 6.102780)
+
 class MapActivity : AppCompatActivity() {
 
+    private var firstLoading: Boolean = true
     private lateinit var map: GoogleMap
+
+    private val viewModel by viewModels<MapViewModel> {
+        ViewModelFactoryRepository(PunktualApplication.repo)
+    }
+
+    private lateinit var geofencingClient: GeofencingClient
+
+    private val geoFencingPendingIntent : PendingIntent by lazy {
+        val intent = Intent(this, GeofenceBroadcastReceiver::class.java)
+        PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
 
     private var userMarker: Marker? = null
 
@@ -56,12 +77,19 @@ class MapActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
-        PunktualApplication.repo.getCurrentUser().observe(this, Observer { updateUi(it) })
+        viewModel.getCurrentUser().observe(this, Observer {
+            updateUi(it)
+        })
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+        geofencingClient = LocationServices.getGeofencingClient(this)
+
         val mapFragment = SupportMapFragment.newInstance(mapOptions)
-        mapFragment.getMapAsync { map = it }
+        mapFragment.getMapAsync {
+            map = it
+            loadingProgressBar.hide()
+        }
 
         supportFragmentManager
             .beginTransaction().replace(R.id.mapFrame, mapFragment)
@@ -70,6 +98,8 @@ class MapActivity : AppCompatActivity() {
         requestLastLocation()
         requestLocation()
 
+        setupGeoFence()
+
         buttonLastPositions.setOnClickListener {
 
         }
@@ -77,6 +107,31 @@ class MapActivity : AppCompatActivity() {
         //Map fragment -
         //Display POIs
         //GeoFence
+    }
+
+    private fun setupGeoFence() {
+        //We monitor only around papeterie, and only when device is Entering the zone
+        val papetGeofence = with(Geofence.Builder()) {
+            setRequestId(PunktualApplication.GEOFENCE_PAPETERIE_ID)
+            setCircularRegion(papeteriePosition.latitude, papeteriePosition.longitude, GEOFENCE_RADIUS)
+            setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+            setExpirationDuration(Geofence.NEVER_EXPIRE)
+            build()
+        }
+
+        val request = with(GeofencingRequest.Builder()) {
+            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            addGeofence(papetGeofence)
+            build()
+        }
+
+        geofencingClient.addGeofences(request, geoFencingPendingIntent)
+            .addOnFailureListener {
+                Timber.e(it, "Could not set up geofence !")
+            }
+            .addOnSuccessListener {
+                Timber.d("Geofence set up successful")
+            }
     }
 
     /**
@@ -130,11 +185,16 @@ class MapActivity : AppCompatActivity() {
                 it.position = latLng
             } ?: run {
                 if(::map.isInitialized){
-                    map.moveCamera(CameraUpdateFactory
-                        .newLatLngZoom(latLng, MAP_DEFAULT_ZOOM)
-                    )
+                    if(firstLoading) {
+                        map.moveCamera(
+                            CameraUpdateFactory
+                                .newLatLngZoom(latLng, MAP_DEFAULT_ZOOM)
+                        )
+                        firstLoading = false
+                    }
 
-                    PunktualApplication.repo.setCurrentUserLocation(location)
+                    Timber.d("Update current user with gathered location $location")
+                    viewModel.loadUserWithPosition(location)
                 }
             }
         }
@@ -208,8 +268,9 @@ class MapActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun updateUi(user: User) {
         pseudoTextView.text = "${user.username} is connected with id: ${user.id}"
-        user.lastPosition?.let {
-            map.addUserMarker(user, it)
+        Timber.d("Update current user with gathered location ${user.lastPosition}")
+        user.lastPosition?.let { positionObject ->
+            userMarker = map.addUserMarkerWithPosition(user, positionObject)
         }
     }
 
