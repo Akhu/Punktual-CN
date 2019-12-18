@@ -20,6 +20,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        startButton.isEnabled = false
+
         FirebaseInstanceId.getInstance().instanceId
             .addOnCompleteListener(OnCompleteListener { task ->
                 //Save token to server when it's successful
@@ -29,12 +31,16 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 // Get new Instance ID token
-                val token = task.result?.token
+                val token = task.result?.let {token ->
 
-                // Log and toast
-                val msg = token
-                Timber.d( msg)
-                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                    startButton.isEnabled = true
+
+                    // Log and toast
+                    val msg = token.token
+                    Timber.d( msg)
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                }
+
             })
 
         //Post for login

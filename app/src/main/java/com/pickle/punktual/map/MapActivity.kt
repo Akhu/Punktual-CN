@@ -35,8 +35,6 @@ private const val REQUEST_CHECK_FOR_SETTINGS = 200
 
 private const val MAP_DEFAULT_ZOOM = 8f
 
-
-
 private const val GEOFENCE_RADIUS = 100F
 
 
@@ -53,6 +51,10 @@ class MapActivity : AppCompatActivity() {
 
     private val geoFencingPendingIntent : PendingIntent by lazy {
         val intent = Intent(this, GeofenceBroadcastReceiver::class.java)
+        viewModel.getCurrentUser().value?.let {
+            intent.putExtra(PunktualApplication.PENDING_INTENT_EXTRA_USER_ID_KEY, it.id.toString())
+        }
+
         PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 

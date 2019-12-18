@@ -15,6 +15,7 @@ class PunktualApplication : Application() {
         const val GEOFENCE_PAPETERIE_ID = "papeterie"
         const val NOTIFICATION_CHANNEL_ID_USER = "UserPosition"
         const val NOTIFICATION_CHANNEL_ID_TEAM = "TeamPosition"
+        const val PENDING_INTENT_EXTRA_USER_ID_KEY = "userId"
         val repo = UserRepository()
     }
 

@@ -1,26 +1,42 @@
 package com.pickle.punktual.geofence
 
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.BitmapDrawable
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import com.pickle.punktual.PunktualApplication
 import com.pickle.punktual.R
-import com.pickle.punktual.map.MapActivity
+import com.pickle.punktual.notifications.buildImageNotification
+import com.pickle.punktual.notifications.triggerNotification
+import com.pickle.punktual.position.Position
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.*
+import okhttp3.*
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MediaType.Companion.toMediaType
 import timber.log.Timber
+import java.io.IOException
+import java.net.URL
+
 
 const val NOTIFICATION_PAPETERIE_ID = 1001
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
+    private val networkCoroutine = CoroutineScope(Dispatchers.IO)
+
     override fun onReceive(context: Context, intent: Intent) {
+       if(intent.getStringExtra(PunktualApplication.PENDING_INTENT_EXTRA_USER_ID_KEY) == null) {
+           Timber.e("Missing user ID from intent")
+           return
+       }
+
+        val userId = intent.getStringExtra(PunktualApplication.PENDING_INTENT_EXTRA_USER_ID_KEY)!!
+
+        Timber.i("User id received from intent $userId")
+
         // This method is called when the BroadcastReceiver is receiving an Intent broadcast.
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
         if(geofencingEvent.hasError()){
@@ -35,49 +51,62 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         }
 
         val triggeringGeofence = geofencingEvent.triggeringGeofences
-
+        val triggeringPosition = Position(geofencingEvent.triggeringLocation.latitude, geofencingEvent.triggeringLocation.longitude)
         triggeringGeofence.forEach {
             if(it.requestId == PunktualApplication.GEOFENCE_PAPETERIE_ID){
+
+                //Send notification to the team via server
+                savePositionToServerAndNotifyTeam(triggeringPosition, userId)
                 Timber.i("You are entering papeterie image factory")
-                triggerNotification(context, geofenceTransition)
+                triggerNotification(context, buildImageNotification(
+                    context,
+                    "Sending notification to the team",
+                    "You are arriving to the Papeterie !",
+                    R.drawable.papeterie_1
+                ),NOTIFICATION_PAPETERIE_ID)
             }
         }
 
     }
 
-    private fun triggerNotification(context: Context, geofenceTransition: Int) {
 
-        val text = "Sending a notification to the team !"
-        val title = "Entering: Papeterie Image factory"
-        val drawable = ContextCompat.getDrawable(context, R.drawable.papeterie_1)!!
-        val bitmap = (drawable as BitmapDrawable).bitmap
+    private fun savePositionToServerAndNotifyTeam(
+        position: Position,
+        userId: String
+    ) {
+        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+        val adapter = moshi.adapter(Position::class.java)
+        val mediaTypeJson = "application/json; charset=utf-8".toMediaType()
+        adapter.toJson(position)?.let {
+            val client = OkHttpClient()
+            val body = it.toRequestBody(mediaTypeJson)
+            val url = with(HttpUrl.Builder()) {
+                scheme("http")
+                host("10.0.2.2")
+                port(8080)
+                addPathSegments("/position/register")
+                addQueryParameter("userId", userId)
+                build()
+            }
+            val request = with(Request.Builder()) {
+                post(body)
+                url(url)
+                addHeader("Content-Type", "application/json")
+                build()
+            }
 
-        //To understand more about Intents : https://developer.android.com/reference/android/content/Intent
-        val intent = Intent(context, MapActivity::class.java).apply {
-            //Flag documentation : https://developer.android.com/reference/android/content/Intent#FLAG_ACTIVITY_NEW_TASK
-            //We want to start a new Activity from the click
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            client.newCall(request).enqueue(responseCallback = object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Timber.e("Exception when calling network ${e.message}")
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    Timber.d("Server response : ${response.body}")
+                }
+
+            })
+
+
         }
-
-        //Assign our intent to a pending intent. Meaning that intent is "waiting" for triggering
-        val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
-
-        //We build our notification with the Compat component and attribute a channel ID
-        val notificationBuilder = with(NotificationCompat.Builder(context, PunktualApplication.NOTIFICATION_CHANNEL_ID_USER)) {
-            setContentText(text)
-            setLargeIcon(bitmap)
-            setSmallIcon(R.drawable.ic_place_white_24dp)
-            setStyle(
-                NotificationCompat.BigPictureStyle()
-                    .bigPicture(bitmap)
-                    .bigLargeIcon(null))
-            //We assign our action intent to the notification.
-            setContentIntent(pendingIntent)
-            setAutoCancel(true)
-            setContentTitle(title)
-        }
-
-        //You can launch notification by calling .notify and finishing building your notification
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_PAPETERIE_ID, notificationBuilder.build())
     }
 }

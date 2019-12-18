@@ -30,6 +30,10 @@ dependencies {
 
     implementation 'joda-time:joda-time:2.10.5'
 
+    //Moshi JSON
+    //We could have taken : GSON, Jackson, KotlinSerialization
+    implementation("com.squareup.moshi:moshi-kotlin:1.9.2")
+
     //Core Android KTX
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.1.0'
@@ -42,7 +46,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:20.1.0'
 
     //OkHTTP Client for network request
-    implementation("com.squareup.okhttp3:okhttp:4.2.1")
+    implementation("com.squareup.okhttp3:okhttp:4.2.2")
+
 
     //Timber for better logging
     implementation 'com.jakewharton.timber:timber:4.7.1'
