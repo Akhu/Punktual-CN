@@ -12,6 +12,9 @@ import com.pickle.punktual.PunktualApplication
 import com.pickle.punktual.R
 import com.pickle.punktual.map.MapActivity
 
+const val NOTIFICATION_INCOMING_SELF_PAPETERIE_ID = 1001
+const val NOTIFICATION_INCOMING_TEAM_PAPETERIE_ID = 2001
+
 fun buildImageNotification(context: Context, text: String, title: String, drawable: Int, channel: String = PunktualApplication.NOTIFICATION_CHANNEL_ID_USER) : Notification{
     val drawableImage = ContextCompat.getDrawable(context, drawable)!!
     val bitmap = (drawableImage as BitmapDrawable).bitmap

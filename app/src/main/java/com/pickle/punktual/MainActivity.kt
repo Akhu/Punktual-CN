@@ -109,7 +109,10 @@ class MainActivity : AppCompatActivity() {
         val adapter = NetworkService.moshi.adapter(UserRegister::class.java)
         adapter.toJson(userRegister)?.let{
             val requestBody = it.toRequestBody(NetworkService.mediaTypeJson)
-            val url = with(NetworkService.baseUrl){
+            val url = with(HttpUrl.Builder()){
+                scheme(NetworkService.baseUrl.scheme)
+                port(NetworkService.baseUrl.port)
+                host(NetworkService.baseUrl.host)
                 addPathSegment("register")
                 build()
             }

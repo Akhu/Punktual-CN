@@ -15,10 +15,12 @@ import java.util.*
 class NetworkService {
 
     companion object {
+
         val baseUrl = with(HttpUrl.Builder()) {
             scheme("http")
-            host("10.0.2.2")
+            host("192.168.2.248")
             port(8080)
+            build()
         }
         val mediaTypeJson = "application/json; charset=utf-8".toMediaType()
         val moshi = Moshi.Builder()

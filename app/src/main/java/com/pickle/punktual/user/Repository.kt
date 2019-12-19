@@ -23,4 +23,11 @@ class UserRepository {
             currentUser.value = currentUserValue
         }
     }
+
+    fun setCurrentUserPushToken(token: String) {
+        currentUser.value?.let { currentUserValue ->
+            currentUserValue.pushToken = token
+            currentUser.value = currentUserValue
+        }
+    }
 }

@@ -14,7 +14,7 @@ enum class UserType {
     STUDENT, TEACHER
 }
 
-data class User(val id: String, val type: UserType = UserType.STUDENT, val username: String, val pushToken: String? = null, val imageUrl: String? = null) {
+data class User(val id: String, val type: UserType = UserType.STUDENT, val username: String, var pushToken: String? = null, val imageUrl: String? = null) {
     //Joda time used : https://www.joda.org/joda-time/quickstart.html
 
     var lastPosition : Position? = null

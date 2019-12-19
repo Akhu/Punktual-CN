@@ -7,6 +7,7 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import com.pickle.punktual.PunktualApplication
 import com.pickle.punktual.R
+import com.pickle.punktual.notifications.NOTIFICATION_INCOMING_SELF_PAPETERIE_ID
 import com.pickle.punktual.notifications.buildImageNotification
 import com.pickle.punktual.notifications.triggerNotification
 import com.pickle.punktual.position.Position
@@ -21,7 +22,7 @@ import java.io.IOException
 import java.net.URL
 
 
-const val NOTIFICATION_PAPETERIE_ID = 1001
+
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
@@ -63,7 +64,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                     "Sending notification to the team",
                     "You are arriving to the Papeterie !",
                     R.drawable.papeterie_1
-                ),NOTIFICATION_PAPETERIE_ID)
+                ), NOTIFICATION_INCOMING_SELF_PAPETERIE_ID)
             }
         }
 
