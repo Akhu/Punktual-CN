@@ -67,9 +67,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                 ), NOTIFICATION_INCOMING_SELF_PAPETERIE_ID)
             }
         }
-
     }
-
 
     private fun savePositionToServerAndNotifyTeam(
         position: Position,

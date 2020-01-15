@@ -7,50 +7,5 @@
     tools:context=".map.MapActivity">
 
 
-    <Button
-        android:id="@+id/buttonLastPositions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="Last Positions"
-        app:layout_constraintBottom_toBottomOf="@+id/pseudoTextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/pseudoTextView"
-        app:layout_constraintVertical_bias="0.551" />
 
-    <FrameLayout
-        android:id="@+id/mapFrame"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pseudoTextView"
-        app:layout_constraintVertical_bias="0.0"
-        tools:layout_editor_absoluteX="0dp">
-
-    </FrameLayout>
-
-    <androidx.core.widget.ContentLoadingProgressBar
-        android:id="@+id/loadingProgressBar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:indeterminate="true"
-        app:layout_constraintBottom_toTopOf="@+id/mapFrame"
-        app:layout_constraintEnd_toStartOf="@+id/mapFrame"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/mapFrame"
-        app:layout_constraintTop_toBottomOf="@+id/mapFrame" />
-
-    <TextView
-        android:id="@+id/pseudoTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="32dp"
-        app:layout_constraintEnd_toStartOf="@+id/buttonLastPositions"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="User Pseudo " />
 </androidx.constraintlayout.widget.ConstraintLayout>

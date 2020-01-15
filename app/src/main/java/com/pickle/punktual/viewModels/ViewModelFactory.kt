@@ -13,6 +13,9 @@ class ViewModelFactoryRepository(private val userRepo: UserRepository) : ViewMod
             modelClass.isAssignableFrom(MapViewModel::class.java) -> MapViewModel(
                 userRepo
             )
+            modelClass.isAssignableFrom(LoginViewModel::class.java) -> LoginViewModel(
+                userRepo
+            )
             else -> throw IllegalArgumentException("Unexpected model class $modelClass")
         } as T
     }

@@ -1,47 +1,50 @@
 package com.pickle.punktual.network
 
-import com.pickle.punktual.position.Position
-import com.squareup.moshi.JsonAdapter
+import com.pickle.punktual.user.User
+import com.pickle.punktual.user.UserRegister
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.internal.http2.Header
-import timber.log.Timber
-import java.io.IOException
-import java.util.*
+import okhttp3.OkHttpClient
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.http.*
 
-class NetworkService {
 
+class APIService {
     companion object {
-
-        val baseUrl = with(HttpUrl.Builder()) {
-            scheme("http")
-            host("192.168.2.248")
-            port(8080)
-            build()
-        }
+        val client = OkHttpClient()
         val mediaTypeJson = "application/json; charset=utf-8".toMediaType()
-        val moshi = Moshi.Builder()
+        val moshi: Moshi = Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .build()
-        val client : OkHttpClient by lazy { OkHttpClient() }
-
-        val jsonHeader =  Header("Content-Type", "application/json")
     }
+}
 
-    fun sendRequest(request: Request, callback : (Unit) -> (Callback)) {
+interface UserService {
 
-            client.newCall(request).enqueue(responseCallback = object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    Timber.e("Exception when calling network ${e.message}")
-                }
+    @GET("api/user/find/{name}")
+    suspend fun loginUser(@Path("name") userName: String): Response<User>
 
-                override fun onResponse(call: Call, response: Response) {
-                    Timber.d("Server response : ${response.body}")
-                }
 
-            })
-        }
+    @Headers("Content-Type:application/json")
+    @POST("/api/user/register")
+    suspend fun registerUser(@Body user: UserRegister): Response<User>?
+}
+
+/**
+ * Main entry point for network access. Call like `DevByteNetwork.devbytes.getPlaylist()`
+ */
+object PunktualNetworkService {
+    // Configure retrofit to parse JSON and use coroutines
+    private const val host = "localhost"
+    private const val port = 8080
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("http://${host}:${port}/")
+        .addConverterFactory(MoshiConverterFactory.create(APIService.moshi))
+        .build()
+
+    val user: UserService = retrofit.create(UserService::class.java)
 }
