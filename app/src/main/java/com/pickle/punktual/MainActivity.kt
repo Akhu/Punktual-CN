@@ -1,13 +1,10 @@
 package com.pickle.punktual
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.pickle.punktual.map.MapActivity
-import com.pickle.punktual.user.User
 
 
 class MainActivity : AppCompatActivity() {

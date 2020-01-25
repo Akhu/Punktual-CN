@@ -1,20 +1,18 @@
 package com.pickle.punktual.login
 
 
-import android.opengl.Visibility
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.pickle.punktual.PunktualApplication
 import com.pickle.punktual.R
 import com.pickle.punktual.RegisterDialogFragment
-import com.pickle.punktual.viewModels.ViewModelFactoryRepository
+import com.pickle.punktual.ViewModelFactoryRepository
 import kotlinx.android.synthetic.main.fragment_login.*
 
 /**
@@ -45,7 +43,7 @@ class LoginFragment : Fragment() {
         //Post for login
         //1. Handle login
         startButton.setOnClickListener {
-            if(loginEditText.text.isNotEmpty()) {
+            if(loginEditText.text.toString() !== "") {
                 viewModel.connectUser(loginEditText.text.toString())
             }
         }

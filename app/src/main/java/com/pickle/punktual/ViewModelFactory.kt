@@ -1,4 +1,4 @@
-package com.pickle.punktual.viewModels
+package com.pickle.punktual
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

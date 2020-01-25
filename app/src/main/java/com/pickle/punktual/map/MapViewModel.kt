@@ -2,11 +2,17 @@ package com.pickle.punktual.map
 
 import android.location.Location
 import androidx.lifecycle.*
+import com.pickle.punktual.network.PunktualNetworkService
+import com.pickle.punktual.position.LocationType
 import com.pickle.punktual.position.Position
 import com.pickle.punktual.user.User
 import com.pickle.punktual.user.UserRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import timber.log.Timber
-import java.lang.IllegalArgumentException
 
 sealed class MapUiState {
     object Loading: MapUiState()
@@ -21,7 +27,13 @@ private val papeteriePosition = Position(45.907888, 6.102780)
 
 class MapViewModel(private val repository: UserRepository) : ViewModel() {
 
+    private val viewModelJob = SupervisorJob()
+
+    private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
+
     private val uiState = MutableLiveData<MapUiState>()
+
+    private val checkInState = MutableLiveData<Boolean>()
 
     fun getUiState() : LiveData<MapUiState> = uiState
 
@@ -50,5 +62,26 @@ class MapViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun loadUserWithPosition(location: Location) {
         repository.setCurrentUserLocation(location)
+    }
+
+    fun checkInNcf(locationType: LocationType) {
+        getCurrentUser().value?.let { user ->
+            user.lastPosition?.let { position ->
+                viewModelScope.launch {
+                    val checkingInRequest = PunktualNetworkService.position.registerPosition(
+                        LocationType.CAMPUS_NUMERIQUE.name,
+                        user.id,
+                        position
+                        )
+                    if(checkingInRequest.isSuccessful){
+                        checkInState.value = true
+                    } else {
+                        uiState.value = MapUiState.Error(HttpException(checkingInRequest).message())
+                        checkInState.value = false
+                    }
+                }
+            }
+        }
+
     }
 }

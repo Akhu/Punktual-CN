@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.text.InputType
 import android.widget.EditText
+import androidx.core.view.marginLeft
 import androidx.fragment.app.DialogFragment
 
 class RegisterDialogFragment : DialogFragment() {
@@ -14,6 +15,7 @@ class RegisterDialogFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val editText = EditText(context)
         editText.inputType = InputType.TYPE_CLASS_TEXT
+        editText.hint = "Enter a creative pseudo here 🦄..."
 
         return with(AlertDialog.Builder(context)) {
             setView(editText)

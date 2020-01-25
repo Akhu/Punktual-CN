@@ -29,7 +29,7 @@ class APIService {
  */
 object PunktualNetworkService {
     // Configure retrofit to parse JSON and use coroutines
-    private const val host = "192.168.2.242"
+    private const val host = "d3cima.tech"
     private const val port = 8080
 
     private val retrofit = Retrofit.Builder()

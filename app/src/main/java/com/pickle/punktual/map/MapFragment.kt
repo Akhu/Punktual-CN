@@ -3,6 +3,7 @@ package com.pickle.punktual.map
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,6 +14,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -26,19 +28,22 @@ import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.pickle.nfcboilerplateapp.NFCData
+import com.pickle.nfcboilerplateapp.NFCScanActivity
 import com.pickle.punktual.PunktualApplication
-
 import com.pickle.punktual.R
 import com.pickle.punktual.geofence.GeofenceBroadcastReceiver
 import com.pickle.punktual.position.LocationData
+import com.pickle.punktual.position.LocationType
 import com.pickle.punktual.position.Position
-import com.pickle.punktual.viewModels.ViewModelFactoryRepository
+import com.pickle.punktual.ViewModelFactoryRepository
 import kotlinx.android.synthetic.main.fragment_map.*
 import timber.log.Timber
 
 
 private const val REQUEST_PERMISSION_LOCATION_START_UPDATE = 101
 private const val REQUEST_CHECK_FOR_SETTINGS = 200
+private const val REQUEST_NFC = 1001
 
 private const val MAP_DEFAULT_ZOOM = 8f
 
@@ -52,6 +57,8 @@ class MapFragment : Fragment() {
     private lateinit var map: GoogleMap
     private lateinit var parentActivity : AppCompatActivity
 
+    private lateinit var binding : View
+
     val viewModel : MapViewModel by viewModels {
         ViewModelFactoryRepository(PunktualApplication.repo)
     }
@@ -61,7 +68,7 @@ class MapFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val binding =  inflater.inflate(R.layout.fragment_map, container, false)
+        binding = inflater.inflate(R.layout.fragment_map, container, false)
 
         //I want my app crash if I don't have my Activity here.
         parentActivity = (this.context as AppCompatActivity)
@@ -93,10 +100,16 @@ class MapFragment : Fragment() {
                 .commit()
         }
 
+        buttonCheckin.setOnClickListener {
+            val intent = Intent(parentActivity, NFCScanActivity::class.java)
+            intent.putExtra(NFCScanActivity.EXTRA_NFC_MODE, NFCScanActivity.NFC_MODE_READ)
+            startActivityForResult(intent, REQUEST_NFC)
+        }
 
         requestLastLocation()
         requestLocation()
     }
+
 
 
     private lateinit var geofencingClient: GeofencingClient
@@ -164,6 +177,28 @@ class MapFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
+            REQUEST_NFC -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    data?.getParcelableExtra<NFCData>("data")?.let {
+                        Timber.d("Received data from NFC Tag :${it.data}")
+                        val locationType = LocationType.valueOf(it.data.toUpperCase())
+                        if (locationType == LocationType.CAMPUS_NUMERIQUE) {
+                            Toast.makeText(
+                                parentActivity,
+                                "Tag recognized ! Checked In at ${it.data}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            viewModel.checkInNcf(locationType)
+                        } else {
+                            Toast.makeText(
+                                parentActivity,
+                                "Tag not recognized ${it.data}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            }
             REQUEST_CHECK_FOR_SETTINGS -> startRequestLocation()
         }
     }
@@ -298,7 +333,7 @@ class MapFragment : Fragment() {
 
             }
             is MapUiState.Ready -> {
-                pseudoTextView.text = "${state.user.username} is connected with id: ${state.user.id}"
+                pseudoTextView.text = "${state.user.username} you are connected :)"
                 state.user.lastPosition?.let { positionObject ->
                     userMarker = map.addUserMarkerWithPosition(state.user, positionObject)
                     Timber.d("Update current user with gathered location ${state.user.lastPosition}")

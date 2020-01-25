@@ -19,9 +19,13 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            buildConfigField("Boolean", "NFC_SIMULATOR_ENABLED", 'false')
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField("Boolean", "NFC_SIMULATOR_ENABLED", 'false')
         }
     }
 }

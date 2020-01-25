@@ -8,18 +8,23 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.pickle.punktual.login.LoginFragment"
-        android:label="fragment_login"
-        tools:layout="@layout/fragment_login" >
+        android:label="Punktual "
+        tools:layout="@layout/fragment_login">
         <action
             android:id="@+id/action_loginFragment_to_mapFragment"
             app:destination="@id/mapFragment"
             app:enterAnim="@anim/nav_default_pop_enter_anim"
             app:popUpTo="@+id/mapFragment"
-            app:popUpToInclusive="false" />
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.pickle.punktual.map.MapFragment"
-        android:label="fragment_map"
+        android:label="Trip to Campus"
         tools:layout="@layout/fragment_map" />
+    <fragment
+        android:id="@+id/lastUsersPositionFragment"
+        android:name="com.pickle.punktual.team.LastUsersPositionFragment"
+        android:label="fragment_last_users_position"
+        tools:layout="@layout/fragment_last_users_position" />
 </navigation>

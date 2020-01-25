@@ -8,9 +8,9 @@ import android.graphics.drawable.BitmapDrawable
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.pickle.punktual.MainActivity
 import com.pickle.punktual.PunktualApplication
 import com.pickle.punktual.R
-import com.pickle.punktual.map.MapActivity
 
 const val NOTIFICATION_INCOMING_SELF_PAPETERIE_ID = 1001
 const val NOTIFICATION_INCOMING_TEAM_PAPETERIE_ID = 2001
@@ -20,7 +20,7 @@ fun buildImageNotification(context: Context, text: String, title: String, drawab
     val bitmap = (drawableImage as BitmapDrawable).bitmap
 
     //To understand more about Intents : https://developer.android.com/reference/android/content/Intent
-    val intent = Intent(context, MapActivity::class.java).apply {
+    val intent = Intent(context, MainActivity::class.java).apply {
         //Flag documentation : https://developer.android.com/reference/android/content/Intent#FLAG_ACTIVITY_NEW_TASK
         //We want to start a new Activity from the click
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
