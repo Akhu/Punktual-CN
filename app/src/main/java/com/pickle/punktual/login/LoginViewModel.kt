@@ -1,4 +1,4 @@
-package com.pickle.punktual.viewModels
+package com.pickle.punktual.login
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -21,9 +21,10 @@ sealed class LoginUiState {
     data class LoginSuccessful(val user: User) : LoginUiState()
     data class Error(val errorMessage: String, val httpException: HttpException? = null) :
         LoginUiState()
+    object Normal : LoginUiState()
 }
 
-class LoginViewModel(userRepository: UserRepository) : ViewModel() {
+class LoginViewModel(val userRepository: UserRepository) : ViewModel() {
 
     private val pushTokenDevice = MutableLiveData<String>()
 
@@ -39,6 +40,21 @@ class LoginViewModel(userRepository: UserRepository) : ViewModel() {
 
     init {
 
+        /**
+         * We want the ui also be updated when someone feed the currentUser from userRepository
+         */
+        uiState.addSource(userRepository.getCurrentUser()) {
+            uiState.value = LoginUiState.LoginSuccessful(it)
+        }
+
+        uiState.addSource(getPushTokenDevice()) {
+            pushTokenDevice.value?.let {
+                uiState.value = LoginUiState.Normal
+            }
+        }
+
+        uiState.value = LoginUiState.Loading
+
         FirebaseInstanceId.getInstance().instanceId
             .addOnCompleteListener(OnCompleteListener { task ->
                 //Save token to server when it's successful
@@ -48,15 +64,15 @@ class LoginViewModel(userRepository: UserRepository) : ViewModel() {
                 }
 
                 // Get new Instance ID token
-                val token = task.result?.let { token ->
+                task.result?.let { token ->
                     pushTokenDevice.value = token.token
                 }
             })
+
+
     }
 
     fun registerUser(username: String) {
-
-
         /**
          * Updating our UI according to our background stuff
          */
@@ -65,13 +81,12 @@ class LoginViewModel(userRepository: UserRepository) : ViewModel() {
             try {
                 //Launch Request
                 //Get value and save it to repo
-
-                userRepository.registerUser(username)
+                userRepository.registerUser(username, pushTokenDevice.value)
             } catch (httpException: HttpException) {
-                if (httpException.code() == 401) {
+                if (httpException.code() == 409) {
                     //Logic to make user register instead of login
                     uiState.value = LoginUiState.Error(
-                        "You already exists in this universe, please Login instead with your Astronaut Profile before",
+                        "This username is already taken in this universe",
                         httpException
                     )
                 } else {
@@ -79,11 +94,8 @@ class LoginViewModel(userRepository: UserRepository) : ViewModel() {
                         "Bad request nor exists reason=${httpException.response()?.raw()}",
                         httpException
                     )
+                    Timber.e("Error during request =${httpException.response()?.errorBody().toString()}")
                 }
-
-                Timber.e("Error during request =${httpException.response()?.errorBody().toString()}")
-                throw Exception("Unhandled status code=${httpException.code()}, server maybe have some issue ? Received=${httpException.message()}")
-
             } catch (exception: Exception) {
                 // Updating UI  when error occurs
                 uiState.value =
@@ -97,12 +109,12 @@ class LoginViewModel(userRepository: UserRepository) : ViewModel() {
         uiState.value = LoginUiState.Loading
         viewModelScope.launch {
             try {
-                userRepository.loginUser(userName)
+                userRepository.loginUser(userName, pushTokenDevice.value)
             } catch (httpException: HttpException) {
                 if (httpException.code() == 404) {
                     //Logic to make user register instead of login
                     uiState.value = LoginUiState.Error(
-                        "You are unknown to this universe, register your Astronaut Profile before",
+                        "You are unknown to this universe, register your Profile before login",
                         httpException
                     )
                 } else {

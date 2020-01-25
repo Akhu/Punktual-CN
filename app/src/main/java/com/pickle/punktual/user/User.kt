@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.maps.model.LatLng
 import com.pickle.punktual.position.Position
 import com.pickle.punktual.position.PositionHistory
+import com.squareup.moshi.JsonClass
 import org.joda.time.DateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -14,7 +15,8 @@ enum class UserType {
     STUDENT, TEACHER
 }
 
-data class User(val id: String, val type: UserType = UserType.STUDENT, val username: String, var pushToken: String? = null, val imageUrl: String? = null) {
+@JsonClass(generateAdapter = true)
+data class User(val id: String, val type: UserType = UserType.STUDENT, val username: String, var pushToken: String? = null, val imageUrl: String? = null, var isLogged: Boolean = false) {
     //Joda time used : https://www.joda.org/joda-time/quickstart.html
 
     var lastPosition : Position? = null
@@ -23,7 +25,8 @@ data class User(val id: String, val type: UserType = UserType.STUDENT, val usern
         lastPosition = Position(location.latitude, location.longitude)
     }
 }
-
+@JsonClass(generateAdapter = true)
 data class UserRegister(val username: String, val pushToken: String?)
 
-data class UserLogin(val id: String, val username: String)
+@JsonClass(generateAdapter = true)
+data class UserLogin(val username: String, val pushToken: String)

@@ -1,6 +1,7 @@
 package com.pickle.punktual.network
 
 import com.pickle.punktual.user.User
+import com.pickle.punktual.user.UserLogin
 import com.pickle.punktual.user.UserRegister
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -22,23 +23,13 @@ class APIService {
     }
 }
 
-interface UserService {
-
-    @GET("api/user/find/{name}")
-    suspend fun loginUser(@Path("name") userName: String): Response<User>
-
-
-    @Headers("Content-Type:application/json")
-    @POST("/api/user/register")
-    suspend fun registerUser(@Body user: UserRegister): Response<User>?
-}
 
 /**
  * Main entry point for network access. Call like `DevByteNetwork.devbytes.getPlaylist()`
  */
 object PunktualNetworkService {
     // Configure retrofit to parse JSON and use coroutines
-    private const val host = "localhost"
+    private const val host = "192.168.2.242"
     private const val port = 8080
 
     private val retrofit = Retrofit.Builder()
@@ -47,4 +38,6 @@ object PunktualNetworkService {
         .build()
 
     val user: UserService = retrofit.create(UserService::class.java)
+
+    var position: PositionService = retrofit.create(PositionService::class.java)
 }

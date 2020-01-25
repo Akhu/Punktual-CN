@@ -28,6 +28,7 @@ import com.pickle.punktual.position.LocationData
 import com.pickle.punktual.position.Position
 import com.pickle.punktual.viewModels.ViewModelFactoryRepository
 import kotlinx.android.synthetic.main.activity_map.*
+import kotlinx.android.synthetic.main.fragment_map.*
 import timber.log.Timber
 
 private const val REQUEST_PERMISSION_LOCATION_START_UPDATE = 101

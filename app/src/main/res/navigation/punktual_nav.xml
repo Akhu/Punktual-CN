@@ -7,12 +7,15 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.pickle.punktual.LoginFragment"
+        android:name="com.pickle.punktual.login.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
             android:id="@+id/action_loginFragment_to_mapFragment"
-            app:destination="@id/mapFragment" />
+            app:destination="@id/mapFragment"
+            app:enterAnim="@anim/nav_default_pop_enter_anim"
+            app:popUpTo="@+id/mapFragment"
+            app:popUpToInclusive="false" />
     </fragment>
     <fragment
         android:id="@+id/mapFragment"

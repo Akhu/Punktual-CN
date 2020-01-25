@@ -2,6 +2,7 @@ package com.pickle.punktual.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.pickle.punktual.login.LoginViewModel
 import com.pickle.punktual.map.MapViewModel
 import com.pickle.punktual.user.UserRepository
 import java.lang.IllegalArgumentException

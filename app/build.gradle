@@ -4,9 +4,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: "androidx.navigation.safeargs.kotlin"
 
 android {
     compileSdkVersion 29
+    kotlinOptions { jvmTarget = "1.8" }
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.pickle.punktual"
@@ -31,7 +33,7 @@ dependencies {
     implementation 'joda-time:joda-time:2.10.5'
 
     //Navigation
-    def nav_version = "2.1.0"
+    def nav_version = "2.2.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
@@ -47,17 +49,17 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
     //Include the kt by viewModel syntax delegation
-    implementation "androidx.fragment:fragment-ktx:1.1.0"
+    implementation "androidx.fragment:fragment-ktx:1.2.0"
 
     //Firebase FCM for notification that comes from Google Cloud
     implementation 'com.google.firebase:firebase-messaging:20.1.0'
 
     //OkHTTP Client for network request
-    implementation "com.squareup.okhttp3:okhttp:4.2.2"
+    implementation "com.squareup.okhttp3:okhttp:4.3.1"
 
     //Retrofit for networking
-    implementation 'com.squareup.retrofit2:retrofit:2.6.0'
-    implementation 'com.squareup.retrofit2:converter-moshi:2.6.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.7.1'
+    implementation 'com.squareup.retrofit2:converter-moshi:2.7.1'
 
     //Moshi for parsing the JSON format
     def moshi_version = "1.9.2"
