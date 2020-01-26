@@ -29,7 +29,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.pickle.nfcboilerplateapp.NFCData
-import com.pickle.nfcboilerplateapp.NFCScanActivity
+import com.pickle.punktual.nfc.NFCScanActivity
 import com.pickle.punktual.PunktualApplication
 import com.pickle.punktual.R
 import com.pickle.punktual.geofence.GeofenceBroadcastReceiver
@@ -37,6 +37,7 @@ import com.pickle.punktual.position.LocationData
 import com.pickle.punktual.position.LocationType
 import com.pickle.punktual.position.Position
 import com.pickle.punktual.ViewModelFactoryRepository
+import com.pickle.punktual.geofence.GeofenceManager
 import kotlinx.android.synthetic.main.fragment_map.*
 import timber.log.Timber
 
@@ -57,6 +58,8 @@ class MapFragment : Fragment() {
     private lateinit var map: GoogleMap
     private lateinit var parentActivity : AppCompatActivity
 
+    private lateinit var locationLiveData: LocationLiveData
+    private lateinit var geofenceManager: GeofenceManager
     private lateinit var binding : View
 
     val viewModel : MapViewModel by viewModels {
@@ -73,6 +76,9 @@ class MapFragment : Fragment() {
         //I want my app crash if I don't have my Activity here.
         parentActivity = (this.context as AppCompatActivity)
 
+        locationLiveData = LocationLiveData(parentActivity.applicationContext)
+        locationLiveData.observe(this, Observer { handleLocationData(it!!) })
+
         return binding.rootView
     }
 
@@ -83,9 +89,7 @@ class MapFragment : Fragment() {
             updateUi(it)
         })
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(parentActivity)
-
-        geofencingClient = LocationServices.getGeofencingClient(parentActivity)
+        geofenceManager = GeofenceManager(parentActivity.applicationContext)
 
         val mapFragment = SupportMapFragment.newInstance(mapOptions)
         mapFragment.getMapAsync {
@@ -105,32 +109,9 @@ class MapFragment : Fragment() {
             intent.putExtra(NFCScanActivity.EXTRA_NFC_MODE, NFCScanActivity.NFC_MODE_READ)
             startActivityForResult(intent, REQUEST_NFC)
         }
-
-        requestLastLocation()
-        requestLocation()
-    }
-
-
-
-    private lateinit var geofencingClient: GeofencingClient
-
-    private val geoFencingPendingIntent : PendingIntent by lazy {
-        val intent = Intent(this.context, GeofenceBroadcastReceiver::class.java)
-        viewModel.getCurrentUser().value?.let {
-            intent.putExtra(PunktualApplication.PENDING_INTENT_EXTRA_USER_ID_KEY, it.id.toString())
-        }
-
-        PendingIntent.getBroadcast(this.context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     private var userMarker: Marker? = null
-
-    private val locationRequest: LocationRequest = LocationRequest.create().apply {
-        interval = 10000
-        fastestInterval = 5000
-        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-    }
-    private lateinit var fusedLocationClient : FusedLocationProviderClient
 
     private val mapOptions by lazy {
         with(GoogleMapOptions()) {
@@ -141,33 +122,7 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun setupGeoFence(poiFence: Position) {
-        //We monitor only around papeterie, and only when device is Entering the zone
-        val papetGeofence = with(Geofence.Builder()) {
-            setRequestId(PunktualApplication.GEOFENCE_PAPETERIE_ID)
-            setCircularRegion(
-                poiFence.latitude, poiFence.longitude,
-                GEOFENCE_RADIUS
-            )
-            setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-            setExpirationDuration(Geofence.NEVER_EXPIRE)
-            build()
-        }
 
-        val request = with(GeofencingRequest.Builder()) {
-            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-            addGeofence(papetGeofence)
-            build()
-        }
-
-        geofencingClient.addGeofences(request, geoFencingPendingIntent)
-            .addOnFailureListener {
-                Timber.e(it, "Could not set up geofence !")
-            }
-            .addOnSuccessListener {
-                Timber.d("Geofence set up successful")
-            }
-    }
 
     /**
      * Override of Activity function, will be useful when you start an activity to expect a result from it.
@@ -199,30 +154,7 @@ class MapFragment : Fragment() {
                     }
                 }
             }
-            REQUEST_CHECK_FOR_SETTINGS -> startRequestLocation()
-        }
-    }
-
-    /**
-     * Starting to send request location
-     */
-    private fun startRequestLocation() {
-        val task = LocationServices
-            .getSettingsClient(parentActivity)
-            .checkLocationSettings(
-                LocationSettingsRequest.Builder().apply {
-                    addLocationRequest(locationRequest)
-                }.build()
-            )
-
-        task.addOnSuccessListener { locationSettingsResponse ->
-            Timber.i("Location settings satisfied. Init location request here")
-            requestLocation()
-        }
-
-        task.addOnFailureListener {
-            Timber.e("Failed to modify location settings")
-            handleLocationData(LocationData(exception = it))
+            REQUEST_CHECK_FOR_SETTINGS -> locationLiveData.startRequestLocation()
         }
     }
 
@@ -285,44 +217,7 @@ class MapFragment : Fragment() {
             return
         }
         when(requestCode) {
-            REQUEST_PERMISSION_LOCATION_START_UPDATE -> requestLastLocation()
-        }
-    }
-
-
-
-    /**
-     * Gather last location
-     * Not meaning it will request a new location
-     */
-    private fun requestLocation() {
-        try {
-            fusedLocationClient.requestLocationUpdates(locationRequest, object : LocationCallback() {
-                override fun onLocationResult(locationResult: LocationResult?) {
-                    locationResult ?: return
-                    locationResult.locations.forEach { location ->
-                        handleLocationData(locationData = LocationData(location))
-                    }
-                }
-            }, Looper.getMainLooper())
-        } catch (exception: SecurityException){
-            handleLocationData(LocationData(exception = exception))
-        }
-    }
-
-    private fun requestLastLocation() {
-        try {
-            fusedLocationClient.lastLocation.addOnSuccessListener {
-                Timber.i("Received location $it")
-                handleLocationData(locationData = LocationData(it))
-            }
-
-            fusedLocationClient.lastLocation.addOnFailureListener {
-                handleLocationData(locationData = LocationData(exception = it))
-                Timber.d("Received Exception From Location Service $it")
-            }
-        } catch (e: SecurityException){
-            handleLocationData(LocationData(exception = e))
+            REQUEST_PERMISSION_LOCATION_START_UPDATE -> locationLiveData.startRequestLocation()
         }
     }
 
@@ -339,7 +234,7 @@ class MapFragment : Fragment() {
                     Timber.d("Update current user with gathered location ${state.user.lastPosition}")
                 }
 
-                setupGeoFence(state.papeteriePointOfInterest)
+                geofenceManager.setupGeoFence(state.papeteriePointOfInterest)
             }
             is MapUiState.Error -> {
                 pseudoTextView.text = state.errorMessage

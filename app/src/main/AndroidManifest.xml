@@ -30,7 +30,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCHCNJ3Y9FGPKsMW97ckhMplLvfW8B0D5A" />
 
-        <activity android:name="com.pickle.nfcboilerplateapp.NFCScanActivity"/>
+        <activity android:name=".nfc.NFCScanActivity"/>
 
         <service
             android:name=".notifications.NotificationFCM"
