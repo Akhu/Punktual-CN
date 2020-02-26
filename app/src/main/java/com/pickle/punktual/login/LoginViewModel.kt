@@ -68,8 +68,6 @@ class LoginViewModel(val userRepository: UserRepository) : ViewModel() {
                     pushTokenDevice.value = token.token
                 }
             })
-
-
     }
 
     fun registerUser(username: String) {

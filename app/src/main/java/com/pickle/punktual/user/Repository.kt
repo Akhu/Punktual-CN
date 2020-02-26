@@ -38,7 +38,7 @@ class UserRepository {
     suspend fun registerUser(login: String, pushToken: String?) {
         Timber.d("Login user request will launch with login=$login")
 
-        val registeredUser = PunktualNetworkService.user.registerUser(
+        val registeredUser = PunktualNetworkService.userService.registerUser(
             UserRegister(login, pushToken)
         )
         registeredUser?.let {
@@ -51,9 +51,13 @@ class UserRepository {
 
     }
 
+    /**
+     *
+     */
     suspend fun loginUser(userName: String, pushToken: String?) {
         pushToken?.let { pushToken  ->
-            val loginUser = PunktualNetworkService.user.loginUser(UserLogin(userName, pushToken))
+            val user = UserLogin(userName, pushToken)
+            val loginUser = PunktualNetworkService.userService.loginUser(user)
             if (loginUser.isSuccessful) {
                 currentUser.postValue(loginUser.body())
             } else {

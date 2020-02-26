@@ -17,6 +17,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [ GOOGLE_MAPS_API_KEY:getApiKey()]
     }
     buildTypes {
         debug {
@@ -28,6 +29,12 @@ android {
             buildConfigField("Boolean", "NFC_SIMULATOR_ENABLED", 'false')
         }
     }
+}
+
+def getApiKey(){
+    def Properties props = new Properties()
+    props.load(new FileInputStream(new File('secrets.properties')))
+    return props['GOOGLE_MAPS_API_KEY']
 }
 
 dependencies {

@@ -30,7 +30,7 @@ class LoginFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
 
-        val binding =inflater.inflate(R.layout.fragment_login, container, false)
+        val binding = inflater.inflate(R.layout.fragment_login, container, false)
 
         return binding.rootView
     }
@@ -49,7 +49,7 @@ class LoginFragment : Fragment() {
         }
 
         registerButton.setOnClickListener {
-            showDialog {username ->
+            showDialog { username ->
                     viewModel.registerUser(username)
                 }
         }

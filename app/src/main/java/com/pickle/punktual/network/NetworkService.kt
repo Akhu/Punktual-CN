@@ -23,7 +23,6 @@ class APIService {
     }
 }
 
-
 /**
  * Main entry point for network access. Call like `DevByteNetwork.devbytes.getPlaylist()`
  */
@@ -37,7 +36,7 @@ object PunktualNetworkService {
         .addConverterFactory(MoshiConverterFactory.create(APIService.moshi))
         .build()
 
-    val user: UserService = retrofit.create(UserService::class.java)
+    val userService: UserService = retrofit.create(UserService::class.java)
 
     var position: PositionService = retrofit.create(PositionService::class.java)
 }
